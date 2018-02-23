@@ -128,3 +128,135 @@ class ZB_ULP_Table extends ZB_ULP_DB_HELPER {
 		parent::__construct( $tableName );
 	}
 }
+
+
+/**
+ * user like post action to db
+ *
+ * @param $user_id
+ * @param $post_id
+ *
+ * @return InsertQuery|int return insert Id
+ */
+function _zb_ulp_user_like_action_to_db( $user_id, $post_id ) {
+	global $wpdb;
+
+	$table_name       = $wpdb->prefix . ZB_ULP_PLUGIN_TABLE_NAME;
+	$table            = new ZB_ULP_Table( $table_name );
+	$check_data_exist = $wpdb->get_var( "SELECT id FROM $table_name WHERE user_id = $user_id AND post_id = $post_id" );
+
+
+	if ( $check_data_exist ) {
+		$result = (int) $check_data_exist;
+	} else {
+		$result = $table->insert( array( 'user_id' => $user_id, 'post_id' => $post_id ) );
+
+	}
+
+	return $result;
+}
+
+
+/**
+ * Check user like this post or not
+ *
+ *
+ * @param $user_id
+ * @param $post_id
+ *
+ * @return bool user like post or not
+ */
+function _zb_ulp_this_post_like( $user_id, $post_id ) {
+	global $wpdb;
+
+	$table_name       = $wpdb->prefix . ZB_ULP_PLUGIN_TABLE_NAME;
+	$check_query      = "SELECT * FROM $table_name WHERE user_id= $user_id AND post_id = $post_id";
+	$check_data_exist = $wpdb->get_var( $check_query );
+
+	return ( ! empty( $check_data_exist ) ) ? true : false;
+
+}
+
+
+/**
+ * It would give you user like post list by array
+ *
+ *
+ * @param $user_id
+ *
+ * @return array|int user_like_post_list_by_array
+ */
+function _zb_ulp_this_user_like_posts_by_user_id( $user_id ) {
+	global $wpdb;
+
+	$table_name       = $wpdb->prefix . ZB_ULP_PLUGIN_TABLE_NAME;
+	$table            = new ZB_ULP_Table( ( $table_name ) );
+	$total_user_likes = $table->get_by( array( 'user_id' => $user_id ), '=' );
+
+	if ( ! empty( $total_user_likes ) ) {
+
+		foreach ( $total_user_likes as $like ) {
+			$result[] = (int) $like->post_id;
+		}
+
+	} else {
+		$result = 0;
+	}
+
+	return $result;
+
+}
+
+
+/**
+ * It would give user like list of given post
+ *
+ *
+ * @param $post_id
+ *
+ * @return array|int user list by array
+ */
+function _zb_ulp_this_post_like_users_by_post_id( $post_id ) {
+	global $wpdb;
+
+	$table_name       = $wpdb->prefix . ZB_ULP_PLUGIN_TABLE_NAME;
+	$table            = new ZB_ULP_Table( ( $table_name ) );
+	$total_user_likes = $table->get_by( array( 'post_id' => $post_id ), '=' );
+
+	if ( ! empty( $total_user_likes ) ) {
+
+		foreach ( $total_user_likes as $like ) {
+			$result[] = (int) $like->user_id;
+		}
+
+	} else {
+		$result = 0;
+	}
+
+	return $result;
+
+}
+
+
+/**
+ * Remove Post Like Row
+ *
+ *
+ *
+ * @param $user_id
+ * @param $post_id
+ *
+ * @return bool it would remove like row
+ */
+function _zb_ulp_unlike( $user_id, $post_id ) {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . ZB_ULP_PLUGIN_TABLE_NAME;
+	$table      = new ZB_ULP_Table( ( $table_name ) );
+	$result     = $table->delete( array( 'user_id' => $user_id, 'post_id' => $post_id ), '=' );
+
+	return ( $result ) ? true : false;
+
+}
+
+
